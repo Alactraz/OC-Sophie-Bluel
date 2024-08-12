@@ -3,28 +3,42 @@ const baseApiUrl = "http://localhost:5678/api/";
 let worksData;
 let categories;
 
-// Fetch \\
+// Fetch \\ 
 window.onload = () => {
-  fetch(`${baseApiUrl}works`)
+  fetchWorks()
+    .then(() => fetchCategories());
+};
+
+// Fetch works API
+function fetchWorks() {
+  return fetch(`${baseApiUrl}works`)
     .then((response) => response.json())
     .then((data) => {
       worksData = data;
-      listOfUniqueCategories();
       displayGallery(worksData);
-      filter = document.querySelector(".filter");
-      categoryFilter(categories, filter);
-      adminMode(filter);
-    });
-};
+    })
+    .catch((error) => console.error('Error fetching works:', error));
+}
 
+// Fetch categories API
+function fetchCategories() {
+  return fetch(`${baseApiUrl}categories`)
+    .then((response) => response.json())
+    .then((data) => {
+      categories = data;
+      const filter = document.querySelector(".filter");
+      if (filter) {
+        categoryFilter(categories, filter);
+        adminMode(filter);
+      }
+    })
+    .catch((error) => console.error('Error fetching categories:', error));
+}
 
-// Gallerie 1.1 \\
-
-// Elements
-let gallery;
-
+// Gallerie 1.1 \\ 
 function displayGallery(data) {
-  gallery = document.querySelector(".gallery");
+  const gallery = document.querySelector(".gallery");
+  if (!gallery) return;
   gallery.innerHTML = "";
   data.forEach((i) => {
     const workCard = document.createElement("figure");
@@ -38,37 +52,25 @@ function displayGallery(data) {
     workCard.append(workImage, workTitle);
     gallery.appendChild(workCard);
   });
-};
+}
 
-// Filtre 1.2 \\
-
-// Elements
-let filter;
-
-function listOfUniqueCategories() {
-  let listOfCategories = new Set();
-  worksData.forEach((work) => {
-    listOfCategories.add(JSON.stringify(work.category));
-  });
-
-  const arrayOfStrings = [...listOfCategories];
-  categories = arrayOfStrings.map((s) => JSON.parse(s));
-};
+// Filtre 1.2 \\ 
 function categoryFilter(categories, filter) {
-  const button = document.createElement("button");
-  button.innerText = "Tous";
-  button.className = "filterButton";
-  button.dataset.category = "Tous";
-  filter.appendChild(button);
+  filter.innerHTML = ""; 
+  const allButton = document.createElement("button");
+  allButton.innerText = "Tous";
+  allButton.className = "filterButton";
+  allButton.dataset.category = "Tous";
+  filter.appendChild(allButton);
   filterButtons(categories, filter);
   functionFilter();
-};
+}
 
 function filterButtons(categories, filter) {
   categories.forEach((categorie) => {
     createButtonFilter(categorie, filter);
   });
-};
+}
 
 function createButtonFilter(categorie, filter) {
   const button = document.createElement("button");
@@ -76,20 +78,20 @@ function createButtonFilter(categorie, filter) {
   button.className = "filterButton";
   button.dataset.category = categorie.name;
   filter.appendChild(button);
-};
+}
 
 function functionFilter() {
   const filterButtons = document.querySelectorAll(".filterButton");
-  filterButtons.forEach((i) => {
-    i.addEventListener("click", function () {
-      toggleProjects(i.dataset.category);
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      toggleProjects(button.dataset.category);
     });
   });
-};
+}
 
 function toggleProjects(datasetCategory) {
   const figures = document.querySelectorAll(".workCard");
-  if ("Tous" === datasetCategory) {
+  if (datasetCategory === "Tous") {
     figures.forEach((figure) => {
       figure.style.display = "block";
     });
@@ -100,7 +102,7 @@ function toggleProjects(datasetCategory) {
         : (figure.style.display = "none");
     });
   }
-};
+}
 
 // Login 2.1 \\
 function displayLogin(login) {
@@ -197,141 +199,208 @@ document.addEventListener("submit", (e) => {
 function adminMode() {
   if (sessionStorage.getItem("token")?.length == 143) {
     document.querySelector(".filter").style.display = "none";
-    document.getElementById("logBtn").innerText = "logout";
+    
+    const logBtn = document.getElementById("logBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      logBtn.style.display = "none";
+      logoutBtn.style.display = "block";
+    } else {
+      logBtn.style.display = "block";
+      logoutBtn.style.display = "none";
+    }
+
     const body = document.querySelector("body");
     const topMenu = document.createElement("div");
-    const publishBtn = document.createElement("button");
-    const edMode = document.createElement("p");
-
+    const editMode = document.createElement("p");
     topMenu.className = "topMenu";
-    edMode.innerHTML = `<i class="fa-regular fa-pen-to-square"></i>Mode édition`;
-    publishBtn.innerText = "Publier les changements";
+    editMode.innerHTML = `<i class="fa-regular fa-pen-to-square"></i>Mode édition`;
     body.insertAdjacentElement("afterbegin", topMenu);
-    topMenu.append(edMode, publishBtn);
-    const edBtn = `<p class="edBtn"><i class="fa-regular fa-pen-to-square"></i>Modifier</p>`;
-    document.querySelector("#introduction img").insertAdjacentHTML("afterend", edBtn);
-    document.querySelector("#introduction article").insertAdjacentHTML("afterbegin", edBtn);
-    document.querySelector("#portfolio h2").insertAdjacentHTML("afterend", edBtn);
-    document.querySelector("#portfolio p").addEventListener("click", ouvModal);
-  }
+    topMenu.append(editMode); 
+    const editBtn = `<p class="editBtn"><i class="fa-regular fa-pen-to-square"></i>Modifier</p>`;
+    document.querySelector("#introduction img").insertAdjacentHTML("afterend", editBtn);
+    document.querySelector("#introduction article").insertAdjacentHTML("afterbegin", editBtn);
+    document.querySelector("#portfolio h2").insertAdjacentHTML("afterend", editBtn);
+    document.querySelector("#portfolio p").addEventListener("click", openModal);
+  };
 };
 
-// MODAL 3.1 \\
+// Logout
+function logout() {
+  sessionStorage.removeItem("token");
+  adminMode();
+  displayMainPage(); 
+}
+// Modale \\
 
-// Elements
-let modal;
-let etapeModal = null;
-
-// Ouverture modal si token présent ET si longueur correct 
-const ouvModal = function () {
+const openModal = function () {
   if (sessionStorage.getItem("token")?.length == 143) {
     modal = document.querySelector(".modal");
-    modal.style.display = "flex"
-    document.querySelector("#ajoutImg").style.display = "none";
-    document.querryselector("#editionGal").style.display = "flex";
-    gallerieModal(worksData)
-    etapeModal = 0;
-    //Fermeture modal addEventListener
-    modal.addEventListener("click", fermModal)
-    //
-    //Bouton Supr 
-    document.addEventListener("click", suprBtn)
-    document.addEventListener("click", ouvFormNouvTrav)
-    //
+    modal.style.display = "flex";
+    document.querySelector("#addPicture").style.display = "none";
+    document.querySelector("#editGallery").style.display = "flex";
+    modalGallery(worksData);
+    modalStep = 0;
+
+    modal.addEventListener("click", closeModal);
+ 
+    document.addEventListener("click", deleteBtn);
+    document.addEventListener("click", openNewWorkForm);
   }
 };
 
-// Fermer la modale 
-const fermModal = function (e) {
+const closeModal = function (e) {
   if (
-    e.target == document.querryselector(".modal") || e.target == document.getElementsByClassName("fa-xmark")[etapeModal]
+    e.target === document.querySelector(".modal") ||
+    e.target === document.getElementsByClassName("fa-xmark")[modalStep]
   ) {
     document.querySelector(".modal").style.display = "none";
-    document.removeEventListener("click", fermModal);
-    document.removeEventListener("click", suprBtn);
-    etapeModal = null;
+    document.removeEventListener("click", closeModal);
+    document.removeEventListener("click", deleteBtn);
+    modalStep = null;
   }
-};
+}
 
-// Supression des travaux 3.2 \\
-function gallerieModal(data) {
-  const contenuModal = document.querryselector(".Modalcontenu");
-  contenuModal.innerhtml = "";
+// Supr \\
+
+function modalGallery(data) {
+  const modalContent = document.querySelector(".modalContent");
+  modalContent.innerHTML = "";
   data.forEach((i) => {
     const miniWork = document.createElement("figure");
     const workImage = document.createElement("img");
     const edit = document.createElement("figcaption");
-    const poubelle = document.createElement("i");
-    poubelle.id = i.id;
-    poubelle.classList.add("fa-solid", "fa-trash-can");
+    const trashCan = document.createElement("i");
+    trashCan.id = i.id;
+    trashCan.classList.add("fa-solid", "fa-trash-can");
     workImage.src = i.imageUrl;
     workImage.alt = i.title;
-    edit.innertext = "editer";
-    miniWork.classname = "miniwork";
-    contenuModal.appendchild(miniWork);
-    miniWork.append(workImage, edit, poubelle);
-  })
-};
-const suprBtn = function (e) {
+    edit.innerText = "éditer";
+    miniWork.className = "miniWork";
+    modalContent.appendChild(miniWork);
+    miniWork.append(workImage, edit, trashCan);
+  });
+}
+
+const deleteBtn = function (e) {
   e.preventDefault();
-  if (e.target.matches(".fa-trash-can")) { suprTravaux(e.target.id); }
+  if (e.target.matches(".fa-trash-can")) {
+    deleteWork(e.target.id);
+  }
 };
-function suprTravaux(i) {
+
+function deleteWork(i) {
   let token = sessionStorage.getItem("token");
   fetch(baseApiUrl + "works/" + i, {
     method: "DELETE",
     headers: {
       authorization: `Bearer ${token}`,
     },
-  })
-    .then((response) => {
-      if (response.ok) {
-        alert("projet supprimer avec succés")
-        worksData = worksData.filter((work) => work.id != i);
-        displayGallery(worksData);
-        gallerieModal(worksData);
-      } else {
-        alert("erreur");
-        fermModal;
-      }
-    });
+  }).then((response) => {
+    if (response.ok) {
+      alert("Projet supprimer avec succés")
+      worksData = worksData.filter((work) => work.id != i);
+      displayGallery(worksData);
+      modalGallery(worksData);
+    } else {
+      alert("Erreur");
+      closeModal;
+    }
+  });
 }
 
-// Ajout travaux \\
+// Ajout Travaux \\
 
-const ouvFormNouvTrav = function (e) {
-  if (e.target == document.querySelector("btnAjoutImg")) {
-    etapeModal = 1;
-    document.querryselector("#ajoutImg").style.display = "flex";
-    document.querryselector("#editionGal").style.display = "none";
-    document.querryselector("#labelPhoto").style.display = "flex";
-    document.querySelector("#imgPreview").style.display = "none";
-    document.querySelector("#valider");
-    document.getElementById("formAjoutImg").reset();
-    formSelectCategorie();
+const openNewWorkForm = function (e) {
+  if(e.target === document.querySelector("#addPictureBtn")){
+    modalStep = 1;
+    document.querySelector("#addPicture").style.display = "flex";
+    document.querySelector("#editGallery").style.display = "none";
+    document.querySelector("#labelPhoto").style.display = "flex";
+    document.querySelector("#picturePreview").style.display = "none";
+    document.querySelector("#valider").style.backgroundColor = "#A7A7A7";
+    document.getElementById("addPictureForm").reset();
+    selectCategoryForm();
     pictureInput = document.querySelector("#photo");
-    pictureInput.onchange = imgPreview;
-    document.querryselector("#formAjoutImg").onchange = changCoulBtn
-    document.addEventListener("click", fermModal)
-    document.querryselector(".modalheader .fa-arrow-left").addEventListener("click", ouvModal);
-    document.removeEventListener("click", ouvFormNouvTrav);
-    document.removeEventListener("click", suprBtn);
-    document.addEventListener("click", ouvFormNouvTrav);
-  };
-};
-const formSelectCategorie = function () {
-  document.querryselector("selectCategorie").innerHTML = "";
+    pictureInput.onchange = picturePreview;
+    document.querySelector("#addPictureForm").onchange = changeSubmitBtnColor;
+    document.addEventListener("click", closeModal);
+    document.querySelector(".modalHeader .fa-arrow-left").addEventListener("click", openModal);
+    document.removeEventListener("click", openNewWorkForm);
+    document.removeEventListener("click", deleteBtn);
+    document.addEventListener("click", newWorkFormSubmit);
+  }
+}
+
+const picturePreview = function() {
+  const [file] = pictureInput.files;
+  if (file) {
+    document.querySelector("#picturePreviewImg").src = URL.createObjectURL(file);
+    document.querySelector("#picturePreview").style.display = "flex";
+    document.querySelector("#labelPhoto").style.display = "none";
+  }
+}
+
+const selectCategoryForm = function () {
+  document.querySelector("#selectCategory").innerHTML = "";
   option = document.createElement("option");
-  document.querySelector("#selectCategorie").appendChild(option);
+  document.querySelector("#selectCategory").appendChild(option);
   categories.forEach((categorie) => {
     option = document.createElement("option");
     option.value = categorie.name;
     option.innerText = categorie.name;
     option.id = categorie.id;
-    document.querySelector("#selectCategorie").appendChild(option);
+    document.querySelector("#selectCategory").appendChild(option);
   });
 };
-const ajoutNouvTravData = function(data, categoryName) {
+
+const newWorkFormSubmit = function (e) {
+  if (e.target === document.querySelector("#valider")) {
+    e.preventDefault();
+    postNewWork();
+  }
+}
+//POST new work
+function postNewWork() {
+  let token = sessionStorage.getItem("token");
+  const select = document.getElementById("selectCategory");
+  const title = document.getElementById("title").value;
+  const categoryName = select.options[select.selectedIndex].innerText;
+  const categoryId = select.options[select.selectedIndex].id;
+  const image = document.getElementById("photo").files[0];
+  let validity = formValidation(image, title, categoryId);
+  if (validity === true) {
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("title", title);
+    formData.append("category", categoryId);
+    sendNewData(token, formData, title, categoryName);
+  }
+};
+const changeSubmitBtnColor = function() {
+  const select = document.getElementById("selectCategory");
+  if (document.getElementById("title").value !== "" && document.getElementById("photo").files[0] !== undefined && select.options[select.selectedIndex].id !== "") {
+    document.querySelector("#valider").style.backgroundColor = "#1D6154";
+  }
+}
+const formValidation = function(image, title, categoryId) {
+  if (image == undefined){
+    alert("Veuillez ajouter une image");
+    return false;
+  }
+  if (title.trim().length == 0){    
+    alert("Veuillez ajouter un titre");
+    return false;
+  }
+  if (categoryId == ""){
+    alert("Veuillez choisir une catégorie");
+    return false;
+  }else{
+  return true;
+  }
+}
+const addToWorksData = function(data, categoryName) {
   newWork = {};
   newWork.title = data.title;
   newWork.id = data.id;
@@ -339,7 +408,7 @@ const ajoutNouvTravData = function(data, categoryName) {
   newWork.imageUrl = data.imageUrl;
   worksData.push(newWork);
 }
-function envNouvData(token, formData, title, categoryName) {
+function sendNewData(token, formData, title, categoryName) {
   fetch(`${baseApiUrl}works`, {
     method: "POST",
     headers: {
@@ -349,18 +418,18 @@ function envNouvData(token, formData, title, categoryName) {
   })
     .then((response) => {
       if (response.ok) {
-        alert("Nouveau fichier envoyer avec succés : ");
+        alert("Nouveau fichier envoyé avec succés : " + title);
         return response.json();
       } else {
-        console.error("Erreur:");
+        console.error("Erreur:", response.status);
       }
     })
     .then ((data) => {
       addToWorksData(data, categoryName);
       displayGallery(worksData);
       document.querySelector(".modal").style.display = "none";
-      document.removeEventListener("click", fermModalModal);
+      document.removeEventListener("click", closeModal);
       modalStep = null;
     })
-    .catch((error) => console.error("Erreur:"));
-};
+    .catch((error) => console.error("Erreur:", error));
+}

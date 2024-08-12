@@ -7,8 +7,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap"
-		rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+	integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+	crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
 	<script src="./javascript/script.js"></script>
@@ -21,7 +23,9 @@
 			<ul>
 				<li onclick="displayMainPage()" id="proBtn">projets</li>
 				<li>contact</li>
-				<li onclick="displayLogin()" id="logBtn">login</button></li>
+				<li onclick="logout()" id="logoutBtn" style="display: none;">logout</li>
+				<li onclick="displayLogin()" id="logBtn">login</li>
+
 				<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 			</ul>
 		</nav>
@@ -47,6 +51,8 @@
 			</section>
 			<section id="portfolio">
 				<h2>Mes Projets</h2>
+				<div id="editBtn">
+				</div>
 				<div class="filter">
 				</div>
 				<div class="gallery">
@@ -66,39 +72,7 @@
 				</form>
 			</section>
 		</div>
-		<aside class="modal">
-			<div class="modalWrap" id="editionGal">
-				<div class="modalHeader"><i class="fa-solid fa-xmark"></i></div>
-				<h3 class="modalTitre">Galerie photo</h3>
-				<div class="modalContenu">
-				</div>
-				<button id="btnAjoutImg">Ajouter une photo</button>
-				<a href="#" id="SuprGallerie">Supprimer la galerie</a>
-			</div>
-			<div class="modalWrap" id="ajoutImg">
-				<div class="modalHeader"><i class="fa-solid fa-arrow-left"></i><i class="fa-solid fa-xmark"></i></div>
-				<h3 class="modalTitre">Ajout photo</h3>
-				<div class="modalContenu">
-					<form id="formAjoutImg" >
-						<div id="labelPhoto">
-							<img src="./assets/icons/picture.png" id="picture" alt="choisir une image">
-							<label for="photo" id="browsePictures">+ Ajouter photo</label>
-							<p>jpg, png : 4mo max</p>
-						</div>
-						<div id="DivImgPrev">
-							<img src="#" alt="votre image" id="imgPreview">
-						</div>
-						<input type="file" class="photo" name="photo" id="photo" accept="image/png, image/jpeg" required>
-						<label for="titre">Titre</label>
-						<input type="text" id="titre" name="titre" required>
-						<label for="selectCategorie">Catégorie</label>
-						<select id="selectCategorie" name="selectCategorie"></select>
-						<input type="submit" id="valider" value="valider">
-					</form>
-				</div>
-				
-			</div>
-		</aside>
+
 	</main>
 
 	<footer>
@@ -108,6 +82,40 @@
 			</ul>
 		</nav>
 	</footer>
+	
+<aside class="modal">
+	<div class="modalWrapper" id="editGallery">
+		<div class="modalHeader"><i class="fa-solid fa-xmark"></i></div>
+		<h3 class="modalTitle">Galerie photo</h3>
+		<div class="modalContent">
+		</div>
+		<button id="addPictureBtn">Ajouter une photo</button>
+		<a href="#" id="deleteGallery">Supprimer la galerie</a>
+	</div>
+	<div class="modalWrapper" id="addPicture">
+		<div class="modalHeader"><i class="fa-solid fa-arrow-left"></i><i class="fa-solid fa-xmark"></i></div>
+		<h3 class="modalTitle">Ajout photo</h3>
+		<div class="modalContent">
+			<form id="addPictureForm" name="addPictureForm">
+				<div id="labelPhoto">
+					<img src="./assets/icons/picture.png" id="picture" alt="choisir une image">
+					<label for="photo" id="browsePictures">+ Ajouter photo</label>
+					<p>jpg, png : 4mo max</p>
+				</div>
+				<div id="picturePreview">
+					<img src="#" alt="votre image" id="picturePreviewImg">
+				</div>
+				<input type="file" class="photo" name="photo" id="photo" accept="image/png, image/jpeg" required>
+				<label for="title">Titre</label>
+				<input type="text" id="title" name="title" required>
+				<label for="selectCategory">Catégorie</label>
+				<select id="selectCategory" name="selectCategory">
+				</select>
+			</form>
+		</div>
+		<input type="submit" id="valider" value="valider">
+	</div>
+</aside>
 </body>
 
 </html>
