@@ -219,8 +219,6 @@ function adminMode() {
     body.insertAdjacentElement("afterbegin", topMenu);
     topMenu.append(editMode); 
     const editBtn = `<p class="editBtn"><i class="fa-regular fa-pen-to-square"></i>Modifier</p>`;
-    document.querySelector("#introduction img").insertAdjacentHTML("afterend", editBtn);
-    document.querySelector("#introduction article").insertAdjacentHTML("afterbegin", editBtn);
     document.querySelector("#portfolio h2").insertAdjacentHTML("afterend", editBtn);
     document.querySelector("#portfolio p").addEventListener("click", openModal);
   };
@@ -231,6 +229,7 @@ function logout() {
   sessionStorage.removeItem("token");
   adminMode();
   displayMainPage(); 
+  window.parent.location.reload();
 }
 // Modale \\
 
