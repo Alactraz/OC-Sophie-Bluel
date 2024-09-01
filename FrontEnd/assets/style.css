@@ -157,7 +157,6 @@ input[type="submit"], button {
 	font-family: 'Syne';
 	font-weight: 700;
 	color: white;
-	background-color: #1D6154;
 	margin : 2em auto ;
 	width: 180px;
 	text-align: center;
@@ -166,24 +165,32 @@ input[type="submit"], button {
 	height: 39px;
 	border: none;
 	display: block;
+	background-color: #1D6154;
 }
-.filterButton, .filterButtonAll, #browsePictures {
-	padding: 10px 20px;
-	border-radius: 60px;
-	border: #1D6154 1px solid;
-	background: none;
-	color: #1D6154;
-	font-family: 'Syne';
-	font-weight: 700;
-	font-size: 16px;
-	text-align: center;
-	margin: 0;
-	width: auto;
-	box-sizing: border-box;
-}
-.filterButton:hover, .filterButton:focus, .filterButtonAll:hover, .filterButtonAll:focus {
+.filterButton:hover, .filterButtonAll:hover{
 	background-color: #1D6154;
 	color: #FFFFFF;
+}
+/* Style par défaut pour les boutons de filtre */
+.filterButton, .filterButtonAll, #browsePictures {
+    padding: 10px 20px;
+    border-radius: 60px;
+    border: #1D6154 1px solid;
+    background: white;
+    color: #1D6154;
+    font-family: 'Syne';
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    margin: 0;
+    width: auto;
+    box-sizing: border-box;
+}
+
+/* Style surligné pour le bouton actif */
+.filterButton.active, .filterButtonAll.active {
+    background-color: #1D6154;
+    color: #FFFFFF;
 }
 .gallery {
 	width: 100%;

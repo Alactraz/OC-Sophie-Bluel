@@ -34,6 +34,31 @@ function fetchCategories() {
     })
     .catch((error) => console.error('Error fetching categories:', error));
 }
+// event listener boutons PRojet log et logout\\
+
+document.addEventListener('DOMContentLoaded', function () {
+  const proBtn = document.getElementById('proBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const logBtn = document.getElementById('logBtn');
+
+  if (proBtn) {
+      proBtn.addEventListener('click', function() {
+          displayMainPage();
+      });
+  }
+
+  if (logoutBtn) {
+      logoutBtn.addEventListener('click', function() {
+          logout();
+      });
+  }
+
+  if (logBtn) {
+      logBtn.addEventListener('click', function() {
+          displayLogin();
+      });
+  }
+});
 
 // Gallerie 1.1 \\ 
 function displayGallery(data) {
@@ -57,12 +82,18 @@ function displayGallery(data) {
 // Filtre 1.2 \\ 
 function categoryFilter(categories, filter) {
   filter.innerHTML = ""; 
+
+  // Créer le bouton "Tous" et le définir comme actif
   const allButton = document.createElement("button");
   allButton.innerText = "Tous";
-  allButton.className = "filterButton";
+  allButton.className = "filterButton active"; // Ajout de la classe active ici
   allButton.dataset.category = "Tous";
   filter.appendChild(allButton);
+
+  // Créer les autres boutons de filtre
   filterButtons(categories, filter);
+
+  // Initialiser les écouteurs d'événements pour les filtres
   functionFilter();
 }
 
@@ -84,6 +115,12 @@ function functionFilter() {
   const filterButtons = document.querySelectorAll(".filterButton");
   filterButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      // Retirer la classe active de tous les boutons
+      filterButtons.forEach(btn => btn.classList.remove('active'));
+      // Ajouter la classe active au bouton cliqué
+      button.classList.add('active');
+      
+      // Appliquer le filtre sur les projets
       toggleProjects(button.dataset.category);
     });
   });
@@ -101,6 +138,64 @@ function toggleProjects(datasetCategory) {
         ? (figure.style.display = "block")
         : (figure.style.display = "none");
     });
+  }
+}
+
+// ajout du CSS active et stockage de l'info \\
+document.addEventListener('DOMContentLoaded', function () {
+  const filterButtons = document.querySelectorAll(".filterButton");
+  const allButton = document.querySelector('.filterButtonAll');
+  
+  // Définir la catégorie active par défaut sur "Tous" si rien n'est stocké dans localStorage
+  const activeCategory = localStorage.getItem('activeCategory') || "Tous";
+  
+  // Appliquer l'état actif uniquement au bouton correspondant
+  filterButtons.forEach(button => {
+      if (button.dataset.category === activeCategory) {
+          button.classList.add('active');
+      } else {
+          button.classList.remove('active');
+      }
+  });
+
+  // Assurez-vous que le bouton "Tous" est toujours actif au chargement
+  if (activeCategory === "Tous") {
+      allButton.classList.add('active');
+  }
+
+  toggleProjects(activeCategory); // Appliquer le filtre dès le chargement de la page
+  functionFilter();
+});
+
+function functionFilter() {
+  const filterButtons = document.querySelectorAll(".filterButton");
+  filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+          // Retirer l'état actif de tous les boutons
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          // Ajouter l'état actif au bouton cliqué
+          button.classList.add('active');
+
+          // Sauvegarder l'état actif dans localStorage
+          localStorage.setItem('activeCategory', button.dataset.category);
+
+          toggleProjects(button.dataset.category);
+      });
+  });
+}
+
+function toggleProjects(datasetCategory) {
+  const figures = document.querySelectorAll(".workCard");
+  if (datasetCategory === "Tous") {
+      figures.forEach((figure) => {
+          figure.style.display = "block";
+      });
+  } else {
+      figures.forEach((figure) => {
+          figure.dataset.category === datasetCategory
+              ? (figure.style.display = "block")
+              : (figure.style.display = "none");
+      });
   }
 }
 
@@ -310,9 +405,9 @@ function deleteWork(i) {
 }
 
 // Ajout Travaux \\
-
+// Fonction pour ouvrir le formulaire d'ajout de travail
 const openNewWorkForm = function (e) {
-  if(e.target === document.querySelector("#addPictureBtn")){
+  if (e.target === document.querySelector("#addPictureBtn")) {
     modalStep = 1;
     document.querySelector("#addPicture").style.display = "flex";
     document.querySelector("#editGallery").style.display = "none";
@@ -332,6 +427,7 @@ const openNewWorkForm = function (e) {
   }
 }
 
+// Fonction pour afficher l'aperçu de l'image
 const picturePreview = function() {
   const [file] = pictureInput.files;
   if (file) {
@@ -341,9 +437,10 @@ const picturePreview = function() {
   }
 }
 
+// Fonction pour remplir le sélecteur de catégories
 const selectCategoryForm = function () {
   document.querySelector("#selectCategory").innerHTML = "";
-  option = document.createElement("option");
+  let option = document.createElement("option");
   document.querySelector("#selectCategory").appendChild(option);
   categories.forEach((categorie) => {
     option = document.createElement("option");
@@ -354,13 +451,15 @@ const selectCategoryForm = function () {
   });
 };
 
+// Fonction pour envoyer le nouveau travail
 const newWorkFormSubmit = function (e) {
   if (e.target === document.querySelector("#valider")) {
     e.preventDefault();
     postNewWork();
   }
-}
-//POST new work
+};
+
+// Fonction pour valider et poster un nouveau travail
 function postNewWork() {
   let token = sessionStorage.getItem("token");
   const select = document.getElementById("selectCategory");
@@ -377,12 +476,28 @@ function postNewWork() {
     sendNewData(token, formData, title, categoryName);
   }
 };
+
+// Fonction pour changer la couleur du bouton de validation
 const changeSubmitBtnColor = function() {
+  const title = document.getElementById("title").value;
+  const photo = document.getElementById("photo").files[0];
   const select = document.getElementById("selectCategory");
-  if (document.getElementById("title").value !== "" && document.getElementById("photo").files[0] !== undefined && select.options[select.selectedIndex].id !== "") {
+  const isValid = title !== "" && photo !== undefined && select.options[select.selectedIndex].id !== "";
+
+  if (isValid) {
     document.querySelector("#valider").style.backgroundColor = "#1D6154";
+  } else {
+    document.querySelector("#valider").style.backgroundColor = "#A7A7A7";
   }
-}
+};
+
+// Ajouter les gestionnaires d'événements lorsque le DOM est prêt
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("title").addEventListener("input", changeSubmitBtnColor);
+  document.getElementById("photo").addEventListener("change", changeSubmitBtnColor);
+  document.getElementById("selectCategory").addEventListener("change", changeSubmitBtnColor);
+});
+
 const formValidation = function(image, title, categoryId) {
   if (image == undefined){
     alert("Veuillez ajouter une image");
@@ -399,6 +514,7 @@ const formValidation = function(image, title, categoryId) {
   return true;
   }
 }
+
 const addToWorksData = function(data, categoryName) {
   newWork = {};
   newWork.title = data.title;
