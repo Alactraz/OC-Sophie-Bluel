@@ -1,4 +1,0 @@
-Les 3 événements HTML doivent se faire depuis le HTML submit
-Les filtre tous disparait
-Le bouton supprimer de la Modale
-Bouton supprimer  qui ne devient pas gris
