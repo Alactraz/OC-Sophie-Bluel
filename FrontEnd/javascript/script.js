@@ -370,7 +370,6 @@ function modalGallery(data) {
     trashCan.classList.add("fa-solid", "fa-trash-can");
     workImage.src = i.imageUrl;
     workImage.alt = i.title;
-    edit.innerText = "éditer";
     miniWork.className = "miniWork";
     modalContent.appendChild(miniWork);
     miniWork.append(workImage, edit, trashCan);
